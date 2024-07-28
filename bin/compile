@@ -36,12 +36,6 @@ mkdir -p $CACHE_DIR
 
 cd $BUILD_DIR
 
-# Check if FVM is installed
-if ! command -v fvm &> /dev/null; then
-  echo "FVM is not installed. Installing FVM..."
-  sudo apt-get install fvm
-fi
-
 if [ -d "$CACHE_DIR/flutter" ]; then
   print "Restoring Flutter SDK from CACHE"
   cp -R $CACHE_DIR/flutter $BUILD_DIR
