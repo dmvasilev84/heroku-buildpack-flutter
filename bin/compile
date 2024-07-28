@@ -39,7 +39,7 @@ cd $BUILD_DIR
 # Check if FVM is installed
 if ! command -v fvm &> /dev/null; then
   echo "FVM is not installed. Installing FVM..."
-  dart pub global activate fvm
+  sudo apt-get install fvm
 fi
 
 if [ -d "$CACHE_DIR/flutter" ]; then
