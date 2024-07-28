@@ -36,6 +36,12 @@ mkdir -p $CACHE_DIR
 
 cd $BUILD_DIR
 
+# Check if FVM is installed
+if ! command -v fvm &> /dev/null; then
+  echo "FVM is not installed. Installing FVM..."
+  dart pub global activate fvm
+fi
+
 if [ -d "$CACHE_DIR/flutter" ]; then
   print "Restoring Flutter SDK from CACHE"
   cp -R $CACHE_DIR/flutter $BUILD_DIR
@@ -53,7 +59,9 @@ if [ -n "$FLUTTER_VERSION" ]; then
   # Check if the FLUTTER_VERSION is the same with the installed one.
   if [ "$FLUTTER_VERSION" != "$FLUTTER_INSTALLED_VERSION" ]; then
     print "Installing Flutter SDK version : $FLUTTER_VERSION"
-    flutter/bin/flutter version $FLUTTER_VERSION --quiet | indent
+    # Use FVM to install the specified version
+    fvm install $FLUTTER_VERSION
+    fvm use $FLUTTER_VERSION
   fi
   rm flutter.json
 
