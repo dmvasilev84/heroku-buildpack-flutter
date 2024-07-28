@@ -67,7 +67,6 @@ if [ -n "$FLUTTER_VERSION" ]; then
   rm flutter.json
 
 else
-
   print "Running flutter upgrade command"
   if [ "$channel" != "stable" ]; then
     flutter/bin/flutter channel stable | indent
@@ -83,7 +82,7 @@ print "Running flutter clean command."
 flutter/bin/flutter clean --quiet | indent
 
 print "Getting packages from Flutter project"
-flutter/bin/flutter pub get --quiet | indent
+flutter/bin/flutter pub get | indent
 
 PATH="$PATH":"$(pwd)/flutter/bin/"
 
@@ -93,6 +92,9 @@ fi
 
 print "Compiling the project with $FLUTTER_BUILD"
 eval $FLUTTER_BUILD | indent
+
+# remove flutter version
+fvm remove $FLUTTER_VERSION
 
 PUB_CACHE="$HOME/.pub-cache/"
 mkdir -p $PUB_CACHE
@@ -125,17 +127,17 @@ fi
 # Is taken from my Github repo because some variables need to be changed every run
 # like PORT from environment.
 
-if [ -d "$CACHE_DIR/.pub-cache/" ]; then
-  print "dhttpd Found in cache. Restoring."
-  cp -R $CACHE_DIR/.pub-cache/* $PUB_CACHE
-else
-  print "Getting dhttpd to run web service."
-  $BUILD_DIR/dart-sdk/bin/dart pub global activate -sgit https://github.com/diezep/dhttpd.git | indent
-
-  print "Getting dhtppd to run web service."
-  mkdir -p $CACHE_DIR/.pub-cache/
-  cp -R $PUB_CACHE/* $CACHE_DIR/.pub-cache/
-fi
+#if [ -d "$CACHE_DIR/.pub-cache/" ]; then
+#  print "dhttpd Found in cache. Restoring."
+#  cp -R $CACHE_DIR/.pub-cache/* $PUB_CACHE
+#else
+#  print "Getting dhttpd to run web service."
+#  $BUILD_DIR/dart-sdk/bin/dart pub global activate -sgit https://github.com/diezep/dhttpd.git | indent
+#
+#  print "Getting dhtppd to run web service."
+#  mkdir -p $CACHE_DIR/.pub-cache/
+#  cp -R $PUB_CACHE/* $CACHE_DIR/.pub-cache/
+#fi
 
 # Moving to the build, after running the compile. All will be deleted and removed to app directory.
 # Copying the result, the files will be kept in storage.
