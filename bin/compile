@@ -93,9 +93,11 @@ fi
 print "Compiling the project with $FLUTTER_BUILD"
 eval $FLUTTER_BUILD | indent
 
+print "Removing flutter version"
 # remove flutter version
-fvm remove $FLUTTER_VERSION
+fvm remove $FLUTTER_VERSION --force
 
+print "Removing fvm"
 # remove fvm
 fvm destroy
 
