@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir> <env-dir>
 
+export PATH="$PATH":"/app/dart-sdk/bin/"
+export PATH="$PATH":"/app/.pub-cache/bin"
+
 set -e
 unset GIT_DIR
 
@@ -94,12 +97,10 @@ print "Compiling the project with $FLUTTER_BUILD"
 eval $FLUTTER_BUILD | indent
 
 print "Removing flutter version"
-# remove all flutter version
 yes | fvm remove --all
 
 print "Removing fvm"
-# remove fvm
-fvm destroy
+yes | fvm destroy
 
 PUB_CACHE="$HOME/.pub-cache/"
 mkdir -p $PUB_CACHE
@@ -148,6 +149,3 @@ fi
 # Moving to the build, after running the compile. All will be deleted and removed to app directory.
 # Copying the result, the files will be kept in storage.
 cp -R $PUB_CACHE $BUILD_DIR
-
-export PATH="$PATH":"/app/dart-sdk/bin/"
-export PATH="$PATH":"/app/.pub-cache/bin"
