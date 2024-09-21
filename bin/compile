@@ -96,24 +96,28 @@ eval $FLUTTER_BUILD | indent
 # remove flutter version
 fvm remove $FLUTTER_VERSION
 
+# remove fvm
+fvm destroy
+
 PUB_CACHE="$HOME/.pub-cache/"
 mkdir -p $PUB_CACHE
 
+# No cache!
 # Saving SDK in Cache and in app.
-if [ -x flutter/bin/flutter ]; then
-  print "Saving Flutter SDK in Cache"
-  rm -rf $CACHE_DIR/flutter
-  cp -R $BUILD_DIR/flutter $CACHE_DIR/flutter
-  mv $BUILD_DIR/flutter/bin/cache/dart-sdk/ $BUILD_DIR
-  rm -rf $BUILD_DIR/flutter
-fi
+#if [ -x flutter/bin/flutter ]; then
+#  print "Saving Flutter SDK in Cache"
+#  rm -rf $CACHE_DIR/flutter
+#  cp -R $BUILD_DIR/flutter $CACHE_DIR/flutter
+#  mv $BUILD_DIR/flutter/bin/cache/dart-sdk/ $BUILD_DIR
+#  rm -rf $BUILD_DIR/flutter
+#fi
 
 #  To read hidden directories and use move with exclusion.
 shopt -s extglob
 
-# Check  FLUTTER_CLEANUP var to delete all files or keep it.
+# Check FLUTTER_CLEANUP var to delete all files or keep it.
 if [ "$FLUTTER_CLEANUP" != false ]; then
-
+  print "Clean up flutter"
   mkdir -p $BUILD_DIR/TO_DELETE
 
   mv !("TO_DELETE") TO_DELETE
