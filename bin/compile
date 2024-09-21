@@ -148,4 +148,10 @@ fi
 
 # Moving to the build, after running the compile. All will be deleted and removed to app directory.
 # Copying the result, the files will be kept in storage.
-cp -R $PUB_CACHE $BUILD_DIR
+#cp -R $PUB_CACHE $BUILD_DIR
+
+print "Cleaning up unnecessary files"
+rm -rf $BUILD_DIR/flutter
+rm -rf $BUILD_DIR/.pub-cache
+rm -rf $BUILD_DIR/.dart_tool
+rm -rf $BUILD_DIR/flutter/bin/cache
