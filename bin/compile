@@ -39,6 +39,14 @@ mkdir -p $CACHE_DIR
 
 cd $BUILD_DIR
 
+# Copy Procfile to the build directory
+if [ -f "../Procfile" ]; then
+  cp ../Procfile $BUILD_DIR/
+  print "Procfile copied to the build directory."
+else
+  print "Procfile not found in the parent directory."
+fi
+
 # Check if FVM is installed
 if ! command -v fvm &> /dev/null; then
   echo "FVM is not installed. Installing FVM..."
