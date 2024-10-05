@@ -39,6 +39,9 @@ mkdir -p $CACHE_DIR
 
 cd $BUILD_DIR
 
+# Print the current build directory
+print "Current build directory: $BUILD_DIR"
+
 # Copy Procfile to the build directory
 if [ -f "../Procfile" ]; then
   cp ../Procfile $BUILD_DIR/
