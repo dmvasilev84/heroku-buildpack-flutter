@@ -128,7 +128,12 @@ if [ "$FLUTTER_CLEANUP" != false ]; then
   mkdir -p $BUILD_DIR/TO_DELETE
 
   mv !("TO_DELETE") TO_DELETE
-  mv TO_DELETE/build/web/* $BUILD_DIR
+  # Check if the build directory exists and contains files
+  if [ -d "TO_DELETE/build/web" ] && [ "$(ls -A TO_DELETE/build/web)" ]; then
+    mv TO_DELETE/build/web/* $BUILD_DIR
+  else
+    print "Warning: TO_DELETE/build/web does not exist or is empty."
+  fi
 #  mv TO_DELETE/dart-sdk $BUILD_DIR
   rm -rf TO_DELETE
 fi
