@@ -98,7 +98,7 @@ PATH="$PATH":"$(pwd)/flutter/bin/"
 
 if [ -z "$FLUTTER_BUILD" ]; then
   if [ -n "$ENVIRONMENT" ] && [ "$ENVIRONMENT" = "prod" ]; then
-    FLUTTER_BUILD="flutter build web --release --quiet --target=lib/main_release.dart"
+    FLUTTER_BUILD="flutter build web --release --quiet --target=lib/main_release.dart --no-pub"
   else
     FLUTTER_BUILD="flutter build web --release --quiet"
   fi
