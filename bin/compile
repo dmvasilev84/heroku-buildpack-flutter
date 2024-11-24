@@ -5,7 +5,7 @@ export PATH="$PATH":"/app/dart-sdk/bin/"
 export PATH="$PATH":"/app/.pub-cache/bin"
 
 set -e
-set -o pipefail
+# set -o pipefail
 unset GIT_DIR
 
 function print() {
