@@ -73,6 +73,7 @@ if [ -n "$FLUTTER_VERSION" ]; then
     # Use FVM to install the specified version
     fvm install $FLUTTER_VERSION
     yes | fvm use $FLUTTER_VERSION
+    yes | fvm use stable
   fi
   rm flutter.json
 
