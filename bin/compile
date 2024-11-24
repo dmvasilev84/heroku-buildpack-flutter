@@ -53,8 +53,8 @@ fi
 
 # Check if FVM is installed
 if ! command -v fvm &> /dev/null; then
-  echo "FVM is not installed. Installing FVM..."
-  dart pub global activate fvm || { echo "Failed to activate FVM"; exit 1; }
+  print "Installing FVM..."
+  dart pub global activate fvm || { print "Failed to activate FVM"; exit 1; }
   export PATH="$PATH":"$HOME/.pub-cache/bin"
 fi
 
@@ -76,6 +76,7 @@ if [ -n "$FLUTTER_VERSION" ]; then
   fi
   rm flutter.json
 
+  flutter/bin/flutter channel stable | indent
 else
   print "Running flutter upgrade command"
   if [ "$channel" != "stable" ]; then
@@ -84,8 +85,6 @@ else
 
   flutter/bin/flutter upgrade --quiet | indent
 fi
-
-flutter/bin/flutter channel stable | indent
 
 print "Enabling Web support"
 flutter/bin/flutter config --enable-web --quiet | indent
