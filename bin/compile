@@ -80,7 +80,9 @@ print "Building Flutter project with: $FLUTTER_BUILD"
 eval $FLUTTER_BUILD || fail "Flutter build failed"
 
 print "Cleaning up unnecessary files"
+rm -rf $BUILD_DIR/flutter
 rm -rf $BUILD_DIR/.pub-cache
 rm -rf $BUILD_DIR/.dart_tool
+rm -rf $BUILD_DIR/flutter/bin/cache
 
 print "Build completed successfully."
