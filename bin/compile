@@ -39,11 +39,10 @@ cd $BUILD_DIR
 
 print "Current build directory: $BUILD_DIR"
 
-if [ -f "../Procfile" ]; then
-  cp ../Procfile $BUILD_DIR/
-  print "Procfile copied to the build directory."
+if [ ! -f "./Procfile" ]; then
+  fail "Procfile not found in the root directory."
 else
-  print "Procfile not found in the parent directory."
+  print "Procfile found in the root directory."
 fi
 
 if [ -z "$FLUTTER_VERSION" ]; then
@@ -52,10 +51,17 @@ fi
 
 print "Downloading and installing Flutter SDK version $FLUTTER_VERSION..."
 FLUTTER_ARCHIVE="flutter_linux_$FLUTTER_VERSION-stable.tar.xz"
-curl -sSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$FLUTTER_ARCHIVE" -o $FLUTTER_ARCHIVE ||
+
+# Ensure Flutter is downloaded properly
+if ! curl -sSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$FLUTTER_ARCHIVE" -o $FLUTTER_ARCHIVE; then
   fail "Failed to download Flutter version $FLUTTER_VERSION"
-tar -xf $FLUTTER_ARCHIVE -C $BUILD_DIR ||
+fi
+
+# Extract Flutter archive
+if ! tar -xf $FLUTTER_ARCHIVE -C $BUILD_DIR; then
   fail "Failed to extract Flutter archive"
+fi
+
 rm $FLUTTER_ARCHIVE
 export PATH="$BUILD_DIR/flutter/bin:$PATH"
 
