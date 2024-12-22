@@ -5,11 +5,16 @@ export PATH="$PATH":"/app/dart-sdk/bin/"
 export PATH="$PATH":"/app/.pub-cache/bin"
 
 set -e
-# set -o pipefail
+set -o pipefail
 unset GIT_DIR
 
 function print() {
   echo "-----> $1"
+}
+
+function fail() {
+  echo "-----> ERROR: $1" >&2
+  exit 1
 }
 
 # Taken from https://devcenter.heroku.com/articles/buildpack-api#bin-compile-summary
@@ -106,45 +111,13 @@ if [ -z "$FLUTTER_BUILD" ]; then
 fi
 
 print "Compiling the project with $FLUTTER_BUILD"
-eval $FLUTTER_BUILD | indent
+eval $FLUTTER_BUILD || fail "Flutter build failed"
 
 print "Removing flutter version"
-yes | fvm remove --all
+yes | fvm remove --all || fail "Failed to remove FVM versions"
 
 print "Removing fvm"
-yes | fvm destroy
-
-PUB_CACHE="$HOME/.pub-cache/"
-mkdir -p $PUB_CACHE
-
-# No cache!
-# Saving SDK in Cache and in app.
-#if [ -x flutter/bin/flutter ]; then
-#  print "Saving Flutter SDK in Cache"
-#  rm -rf $CACHE_DIR/flutter
-#  cp -R $BUILD_DIR/flutter $CACHE_DIR/flutter
-#  mv $BUILD_DIR/flutter/bin/cache/dart-sdk/ $BUILD_DIR
-#  rm -rf $BUILD_DIR/flutter
-#fi
-
-#  To read hidden directories and use move with exclusion.
-shopt -s extglob
-
-# Check FLUTTER_CLEANUP var to delete all files or keep it.
-if [ "$FLUTTER_CLEANUP" != false ]; then
-  print "Clean up flutter"
-  mkdir -p $BUILD_DIR/TO_DELETE
-
-  mv !("TO_DELETE") TO_DELETE
-  # Check if the build directory exists and contains files
-  if [ -d "TO_DELETE/build/web" ] && [ "$(ls -A TO_DELETE/build/web)" ]; then
-    mv TO_DELETE/build/web/* $BUILD_DIR
-  else
-    print "Warning: TO_DELETE/build/web does not exist or is empty."
-  fi
-#  mv TO_DELETE/dart-sdk $BUILD_DIR
-  rm -rf TO_DELETE
-fi
+yes | fvm destroy || fail "Failed to destroy FVM"
 
 print "Cleaning up unnecessary files"
 rm -rf $BUILD_DIR/flutter
