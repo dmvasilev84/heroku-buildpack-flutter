@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir> <env-dir>
 
-export PATH="$PATH":"/app/dart-sdk/bin/"
-export PATH="$PATH":"/app/.pub-cache/bin"
-
 set -e
 set -o pipefail
 unset GIT_DIR
+
+export PATH="$PATH:/app/dart-sdk/bin:/app/.pub-cache/bin"
 
 function print() {
   echo "-----> $1"
@@ -17,8 +16,10 @@ function fail() {
   exit 1
 }
 
-# Taken from https://devcenter.heroku.com/articles/buildpack-api#bin-compile-summary
-function export_env_dir() {
+BUILD_DIR=${1:-}
+CACHE_DIR=${2:-}
+
+export_env_dir() {
   env_dir=$1
   acceptlist_regex=${2:-''}
   denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
@@ -26,29 +27,18 @@ function export_env_dir() {
     for e in $(ls $env_dir); do
       echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
         export "$e=$(cat $env_dir/$e)"
-      :
     done
   fi
 }
-# Taken from https://devcenter.heroku.com/articles/buildpack-api#style
-function indent() {
-  sed -u 's/^/       /'
-}
-
-BUILD_DIR=${1:-}
-CACHE_DIR=${2:-}
 
 export_env_dir "$3"
 
-# Create the cache directory if not exist.
 mkdir -p $CACHE_DIR
 
 cd $BUILD_DIR
 
-# Print the current build directory
 print "Current build directory: $BUILD_DIR"
 
-# Copy Procfile to the build directory
 if [ -f "../Procfile" ]; then
   cp ../Procfile $BUILD_DIR/
   print "Procfile copied to the build directory."
@@ -56,71 +46,41 @@ else
   print "Procfile not found in the parent directory."
 fi
 
-# Check if FVM is installed
-if ! command -v fvm &> /dev/null; then
-  print "Installing FVM..."
-  dart pub global activate fvm || { print "Failed to activate FVM"; exit 1; }
-  export PATH="$PATH":"$HOME/.pub-cache/bin"
+if [ -z "$FLUTTER_VERSION" ]; then
+  fail "FLUTTER_VERSION is not set. Please specify the Flutter version to use."
 fi
 
-print "Installing SDK from Github repository."
-git clone https://github.com/flutter/flutter.git --quiet
-
-# Check if FLUTTER_VERSION variables is set.
-if [ -n "$FLUTTER_VERSION" ]; then
-  # Load bash variables from flutter --machine --version and read it like  $FLUTTER_VERSION variable.
-  flutter/bin/flutter --machine --version >flutter.json
-  FLUTTER_INSTALLED_VERSION=$(grep -o '"frameworkVersion": *"[^"]*' flutter.json | grep -o '[^"]*$')
-
-  # Check if the FLUTTER_VERSION is the same with the installed one.
-  if [ "$FLUTTER_VERSION" != "$FLUTTER_INSTALLED_VERSION" ]; then
-    print "Installing Flutter SDK version : $FLUTTER_VERSION"
-    # Use FVM to install the specified version
-    fvm install $FLUTTER_VERSION
-    yes | fvm use $FLUTTER_VERSION
-  fi
-  rm flutter.json
-
-  flutter/bin/flutter channel stable | indent
-else
-  print "Running flutter upgrade command"
-  if [ "$channel" != "stable" ]; then
-    flutter/bin/flutter channel stable | indent
-  fi
-
-  flutter/bin/flutter upgrade --quiet | indent
-fi
+print "Downloading and installing Flutter SDK version $FLUTTER_VERSION..."
+FLUTTER_ARCHIVE="flutter_linux_$FLUTTER_VERSION-stable.tar.xz"
+curl -sSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$FLUTTER_ARCHIVE" -o $FLUTTER_ARCHIVE ||
+  fail "Failed to download Flutter version $FLUTTER_VERSION"
+tar -xf $FLUTTER_ARCHIVE -C $BUILD_DIR ||
+  fail "Failed to extract Flutter archive"
+rm $FLUTTER_ARCHIVE
+export PATH="$BUILD_DIR/flutter/bin:$PATH"
 
 print "Enabling Web support"
-flutter/bin/flutter config --enable-web --quiet | indent
+flutter config --enable-web || fail "Failed to enable web support"
 
-print "Running flutter clean command."
-flutter/bin/flutter clean --quiet | indent
+print "Running flutter clean"
+flutter clean || fail "Flutter clean failed"
 
-print "Getting packages from Flutter project"
-flutter/bin/flutter pub get | indent
-
-PATH="$PATH":"$(pwd)/flutter/bin/"
+print "Getting Flutter packages"
+flutter pub get || fail "Failed to get packages"
 
 if [ -z "$FLUTTER_BUILD" ]; then
-  if [ -n "$ENVIRONMENT" ] && [ "$ENVIRONMENT" = "prod" ]; then
-    FLUTTER_BUILD="flutter build web --release --quiet --target=lib/main_release.dart"
+  if [ "$ENVIRONMENT" = "prod" ]; then
+    FLUTTER_BUILD="flutter build web --release --target=lib/main_release.dart"
   else
-    FLUTTER_BUILD="flutter build web --release --quiet"
+    FLUTTER_BUILD="flutter build web --release"
   fi
 fi
 
-print "Compiling the project with $FLUTTER_BUILD"
+print "Building Flutter project with: $FLUTTER_BUILD"
 eval $FLUTTER_BUILD || fail "Flutter build failed"
 
-print "Removing flutter version"
-yes | fvm remove --all || fail "Failed to remove FVM versions"
-
-print "Removing fvm"
-yes | fvm destroy || fail "Failed to destroy FVM"
-
 print "Cleaning up unnecessary files"
-rm -rf $BUILD_DIR/flutter
 rm -rf $BUILD_DIR/.pub-cache
 rm -rf $BUILD_DIR/.dart_tool
-rm -rf $BUILD_DIR/flutter/bin/cache
+
+print "Build completed successfully."
