@@ -66,13 +66,13 @@ rm $FLUTTER_ARCHIVE
 export PATH="$BUILD_DIR/flutter/bin:$PATH"
 
 print "Enabling Web support"
-flutter config --enable-web || fail "Failed to enable web support"
+flutter config --enable-web --no-version-check || fail "Failed to enable web support"
 
 print "Running flutter clean"
-flutter clean || fail "Flutter clean failed"
+flutter clean --no-version-check || fail "Flutter clean failed"
 
 print "Getting Flutter packages"
-flutter pub get || fail "Failed to get packages"
+flutter pub get --no-version-check || fail "Failed to get packages"
 
 if [ -z "$FLUTTER_BUILD" ]; then
   if [ "$ENVIRONMENT" = "prod" ]; then
@@ -83,7 +83,7 @@ if [ -z "$FLUTTER_BUILD" ]; then
 fi
 
 print "Building Flutter project with: $FLUTTER_BUILD"
-eval $FLUTTER_BUILD || fail "Flutter build failed"
+eval $FLUTTER_BUILD --no-version-check || fail "Flutter build failed"
 
 print "Cleaning up unnecessary files"
 rm -rf $BUILD_DIR/flutter
