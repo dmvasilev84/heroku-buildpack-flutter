@@ -69,7 +69,7 @@ print "Enabling web support"
 flutter config --enable-web --no-version-check || fail "Failed to enable web support"
 
 print "Running flutter clean"
-flutter clean || fail "Flutter clean failed"
+flutter clean --no-version-check || fail "Flutter clean failed"
 
 print "Getting flutter packages"
 flutter pub get || fail "Failed to get packages"
