@@ -72,7 +72,7 @@ print "Running flutter clean"
 flutter clean --no-version-check || fail "Flutter clean failed"
 
 print "Getting flutter packages"
-flutter pub get || fail "Failed to get packages"
+flutter pub get --no-version-check || fail "Failed to get packages"
 
 if [ -z "$FLUTTER_BUILD" ]; then
   if [ "$ENVIRONMENT" = "prod" ]; then
